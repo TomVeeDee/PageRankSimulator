@@ -36,7 +36,7 @@
           </v-col>
         </v-row>
         <!-- sliders -->
-        <v-slider v-model="speed" label="snelheid" min="1" max="100"
+        <v-slider v-model="speed" label="snelheid" min="1" max="100" step="5"
           ><template v-slot:append
             ><div class="mt-0 pt-0" type="number" style="width: 35px">
               {{ speed }}
