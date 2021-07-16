@@ -8,6 +8,7 @@ export class PageRankSimulator {
     this.totalHits = 0;
     this.nodeList = nodeList;
     this.randomGen = new Random(MersenneTwister19937.autoSeed());
+    this.wasRandomChoice = false;
   }
 
   _probability(n) {
@@ -36,12 +37,15 @@ export class PageRankSimulator {
       if (this.currentNode.connections.length == 0) {
         //dangling node, choose random node
         nextNode = this._chooseRandom(this.nodeList);
+        this.wasRandomChoice = true;
       } else {
         nextNode = this._chooseRandom(this.currentNode.connections);
+        this.wasRandomChoice = false;
       }
     } else {
       // we choose a random node
       nextNode = this._chooseRandom(this.nodeList);
+      this.wasRandomChoice = true;
     }
 
     nextNode.hits = nextNode.hits + 1;
@@ -50,7 +54,7 @@ export class PageRankSimulator {
     this.currentNode = nextNode;
     return nextNode;
   }
-
+  
   relativeHits(node) {
     return this.totalHits == 0 ? 0 : node.hits / this.totalHits;
   }

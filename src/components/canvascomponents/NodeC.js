@@ -8,15 +8,15 @@ export default class NodeC {
     style = {
       radius: 20,
       lineOptions: {},
-      fillOptions: { color: 0x658c14 },
+      fillOptions: { color: 0x1976d2 },
       textStyle: new PIXI.TextStyle({fill: 0xffffff}),
       zIndex: 1
     },
     styleActive = {
       radius: 20,
       lineOptions: {},
-      fillOptions: { color: 0xcf2b06 },
-      textStyle: new PIXI.TextStyle({fill: 0xffffff}),
+      fillOptions: { color: 0x4CAF50 },
+      textStyle: new PIXI.TextStyle({fill: 0x658c14}),
       zIndex: 1
     }
   ) {
@@ -48,6 +48,10 @@ export default class NodeC {
         throw "Invalid state, only state default and active are supported"
     }
     this._state = newState; // validation could be checked here such as only allowing non numerical values
+  }
+
+  get state() {
+    return this._state;
   }
 
   draw() {

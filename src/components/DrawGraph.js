@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import NodeC from "./canvascomponents/NodeC.js";
 import ConnectorC from "./canvascomponents/ConnectorC.js";
-
+import {NodeUtils} from "../pagerank/Node"
 export class GraphDrawer {
   constructor(app, nodes) {
     this.nodes = nodes;
@@ -34,12 +34,27 @@ export class GraphDrawer {
 
       for (const toNode of reducedList) {
         let con = new ConnectorC(app.stage, node, toNode);
+        con.onClick = (con,e) => this._connectionUpdate(con,e,this);
         node.connectorCs.push(con);
         this.connectors.push(con);
       }
     }
   }
+  _connectionUpdate(con, e, self) {
+    let node1 = [...self.nodeMapping.entries()].find(([k, v]) => v == con.node1)[0];
+    let node2 = [...self.nodeMapping.entries()].find(([k, v]) => v == con.node2)[0];
 
+    if(con.state === "disabled") {
+      con.state = "default";
+      NodeUtils.connect(node1, node2);
+    } else {
+      con.state = "disabled";
+      NodeUtils.removeConnection(node1, node2);
+    }
+
+    con.draw();
+
+  }
   updateScaling() {
     let minDim = (this.app.screen.height < this.app.screen.width) ? this.app.screen.height : this.app.screen.width;
     let vertices = this._regPolyGetVertices(minDim / 3, {
@@ -52,22 +67,23 @@ export class GraphDrawer {
     }
   }
 
-  highlight(node1, node2) {
+  highlight(node1, node2, hightLightCon = true) {
     let node1C = this.nodeMapping.get(node1);
     let node2C = this.nodeMapping.get(node2);
     node2C.state = "active";
     node2C.draw();
-
-
-    let connection = node1C.connectorCs[node1C.connectorCs.indexOf(node2C)];
-    connection = node1C.connectorCs.find(e =>e.node2 == node2C);
-
-    // we dont check if the connection is active or exist, we assume that this function will never be called on an inactive/non existing connection
-    connection.state = "active";
-    connection.draw();
-
     this.hightlighted.push(node2C);
-    this.hightlighted.push(connection);
+
+    if (hightLightCon) {
+      let connection = node1C.connectorCs[node1C.connectorCs.indexOf(node2C)];
+      connection = node1C.connectorCs.find(e =>e.node2 == node2C);
+  
+      // we dont check if the connection is active or exist, we assume that this function will never be called on an inactive/non existing connection
+      connection.state = "active";
+      connection.draw();
+      this.hightlighted.push(connection);
+    }
+
   }
 
   removeHighlights() {

@@ -43,21 +43,30 @@
         </v-row>
         <!-- sliders -->
         <v-slider v-model="speed" label="snelheid" min="1" max="100" step="5"
-          ><template v-slot:append
-            ><div class="mt-0 pt-0" type="number" style="width: 35px">
-              {{ speed }}
-            </div>
-          </template></v-slider
-        >
+          ><template v-slot:append>
+            <v-text-field
+              v-model="speed"
+              class="mt-0 pt-0"
+              type="number"
+              style="width: 60px"
+            ></v-text-field> </template
+        ></v-slider>
         <v-slider v-model="alpha" label="alpha" min="0" max="1" step="0.05"
           ><template v-slot:append>
-            <div class="mt-0 pt-0" type="number" style="width: 35px">
-              {{ alpha }}
-            </div>
-          </template></v-slider
-        >
+            <v-text-field
+              v-model="alpha"
+              class="mt-0 pt-0"
+              type="number"
+              style="width: 60px"
+            ></v-text-field> </template
+        ></v-slider>
         <v-row>
-          <v-col> </v-col>
+          <v-col
+            ><small
+              >klik op de pijlen om verbindingen te activeren of te
+              deactiveren</small
+            >
+          </v-col>
         </v-row>
       </v-col>
     </v-row>
@@ -159,16 +168,23 @@ export default {
       this.currentNode = n1;
     },
     step() {
-      let nextNode = this.pageRankSim.step();
+      let nextNode = this.pageRankSim.step(this.alpha);
       this.$refs.graph.removeHighlights();
-      this.$refs.graph.highlightPath(this.currentNode, nextNode);
+      this.$refs.graph.highlightPath(
+        this.currentNode,
+        nextNode,
+        !this.pageRankSim.wasRandomChoice
+      );
       this.currentNode = nextNode;
       // console.log(nextNode.name);
       // console.log(this.data[0].hits);
     },
-    reset() {},
+    reset() {
+      this.stop();
+      this.init();
+    },
     start() {
-      this.timer = setInterval(this.step, 1000);
+      this.timer = setInterval(this.step, 5000 / 1);
     },
     stop() {
       clearInterval(this.timer);
@@ -186,7 +202,8 @@ export default {
     for (let i = 0; i < 5; i++) {
       this.$watch("nodes." + i.toString() + ".hits", function (val) {
         this.$set(this.data[i], "hits", val);
-        this.$set(this.data[i], "fraction", (val * 100) / this.totalHits);
+        let frac = this.totalHits == 0 ? 0 : (val * 100) / this.totalHits;
+        this.$set(this.data[i], "fraction", frac);
       });
     }
   },

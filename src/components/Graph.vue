@@ -1,7 +1,9 @@
 <template>
-  <div id="canvas_container">
-    <canvas id="pixi"></canvas>
-  </div>
+  <v-card>
+    <div id="canvas_container">
+      <canvas id="pixi"></canvas>
+    </div>
+  </v-card>
 </template>
 
 <script>
@@ -40,8 +42,8 @@ export default {
         this.drawer.draw();
       };
     },
-    highlightPath(node1, node2) {
-      this.drawer.highlight(node1, node2);
+    highlightPath(node1, node2, highlightCon = false) {
+      this.drawer.highlight(node1, node2, highlightCon);
     },
     removeHighlights() {
       this.drawer.removeHighlights();

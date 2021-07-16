@@ -7,29 +7,29 @@ export default class ConnectorC {
     target,
     node1,
     node2,
-    onClick = () => {},
+    onClick = (self,e) => {},
     // old color 0x1976d2
     style = {
       bending: 20,
       tipLength: 25,
       arrowWidth: 11,
-      lineOptions: { color: 0x658c14, width: 2, alpha: 1 },
-      fillOptions: { color: 0x658c14 },
+      lineOptions: { color: 0x1976d2, width: 2, alpha: 1 },
+      fillOptions: { color: 0x1976d2 },
     },
     // old color 0xaecae6
     styleDisabled = {
       bending: 20,
       tipLength: 25,
       arrowWidth: 11,
-      lineOptions: { color: 0xa5ca49, width: 2, alpha: 1 },
-      fillOptions: { color: 0xa5ca49 },
+      lineOptions: { color: 0xaecae6, width: 2, alpha: 1 },
+      fillOptions: { color: 0xaecae6 },
     },
     styleActive = {
       bending: 20,
       tipLength: 25,
-      arrowWidth: 11,
-      lineOptions: { color: 0xcf2b06, width: 2, alpha: 1 },
-      fillOptions: { color: 0xcf2b06 },
+      arrowWidth: 12,
+      lineOptions: { color: 0x4CAF50, width: 4, alpha: 1 },
+      fillOptions: { color: 0x4CAF50 },
     },
   ) {
     this.node1 = node1;
@@ -38,7 +38,6 @@ export default class ConnectorC {
     this.styleDisabled = styleDisabled;
     this.styleActive = styleActive;
     this.onClick = onClick;
-    this.isActive = true;
     this.target = null; // see this.draw(target)
 
     this._state = "default";
@@ -47,7 +46,7 @@ export default class ConnectorC {
     // enable interaction and set call function
     this.graphics.interactive = true;
     this.graphics.buttonMode = true;
-    this.graphics.on("pointertap", (e) => this._onClick(this, e));
+    this.graphics.on("pointertap", (e) => this.onClick(this, e));
     target.addChild(this.graphics);
   }
 
@@ -64,20 +63,8 @@ export default class ConnectorC {
     this._state = newState; // validation could be checked here such as only allowing non numerical values
   }
 
-  _onClick(self, e) {
-    if (this.isActive) {
-      if (this.changeStyleOnClick) {
-        this._draw(this.styleDisabled);
-      }
-      this.isActive = false;
-    } else {
-      if (this.changeStyleOnClick) {
-        this._draw(this.style);
-      }
-      this.isActive = true;
-    }
-
-    this.onClick();
+  get state() {
+    return this._state;
   }
 
   _moveOnNormal(vert1, vert2, t, d) {
