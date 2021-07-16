@@ -2,7 +2,7 @@
   <v-app>
     <v-row>
       <!-- Canvas -->
-      <v-col cols="8"><Graph></Graph></v-col>
+      <v-col cols="8"><Graph ref="graph" :nodes="nodes"></Graph></v-col>
       <!-- Data and controls -->
       <v-col cols="4">
         <!-- table -->
@@ -12,7 +12,6 @@
               :headers="headers"
               :items="data"
               :items-per-page="-1"
-              hide-default-header
               hide-default-footer
               disable-pagination
               disable-sort
@@ -24,15 +23,22 @@
                   </template></v-progress-linear
                 >
               </template>
+              <template v-slot:body.append>
+                <tr class="pa-0">
+                  <th>Totaal hits</th>
+                  <th>{{ totalHits }}</th>
+                  <th></th>
+                </tr>
+              </template>
             </v-data-table>
           </v-col>
         </v-row>
         <!-- control buttons -->
         <v-row>
           <v-col>
-            <v-btn color="success"> start </v-btn>
-            <v-btn class="ma-2" color="error"> stop </v-btn>
-            <v-btn color="primary"> reset </v-btn>
+            <v-btn color="success" @click="start"> start </v-btn>
+            <v-btn class="ma-2" color="error" @click="stop"> stop </v-btn>
+            <v-btn color="primary" @click="reset"> reset </v-btn>
           </v-col>
         </v-row>
         <!-- sliders -->
@@ -60,10 +66,15 @@
 
 <script>
 import Graph from "./components/Graph.vue";
+import { Node, NodeUtils } from "./pagerank/Node";
+import { PageRankSimulator } from "./pagerank/PageRankSimulator";
+
 export default {
   components: { Graph },
   data() {
     return {
+      nodes: null,
+      pageRankSim: null,
       speed: 1,
       alpha: 1,
       headers: [
@@ -76,11 +87,51 @@ export default {
         { text: "hits", value: "hits" },
         { text: "verdeling", value: "fraction" },
       ],
-      data: [
+      data: [],
+      statistics: {},
+    };
+  },
+  methods: {
+    init() {
+      const NODE_NAMES = ["A", "B", "C", "D", "E"];
+      let n1 = new Node(NODE_NAMES[0]);
+      let n2 = new Node(NODE_NAMES[1]);
+      let n3 = new Node(NODE_NAMES[2]);
+      let n4 = new Node(NODE_NAMES[3]);
+      let n5 = new Node(NODE_NAMES[4]);
+
+      NodeUtils.connect(n1, n2);
+      NodeUtils.connect(n1, n3);
+      NodeUtils.connect(n1, n4);
+      NodeUtils.connect(n1, n5);
+
+      NodeUtils.connect(n2, n1);
+      NodeUtils.connect(n2, n3);
+      NodeUtils.connect(n2, n4);
+      NodeUtils.connect(n2, n5);
+
+      NodeUtils.connect(n3, n1);
+      NodeUtils.connect(n3, n2);
+      NodeUtils.connect(n3, n4);
+      NodeUtils.connect(n3, n5);
+
+      NodeUtils.connect(n4, n1);
+      NodeUtils.connect(n4, n2);
+      NodeUtils.connect(n4, n3);
+      NodeUtils.connect(n4, n5);
+
+      NodeUtils.connect(n5, n1);
+      NodeUtils.connect(n5, n2);
+      NodeUtils.connect(n5, n3);
+      NodeUtils.connect(n5, n4);
+
+      this.$set(this.statistics, "A", 0);
+      this.nodes = [n1, n2, n3, n4, n5];
+      this.data = [
         {
           siteName: "A",
-          hits: 0,
-          fraction: 20,
+          hits: this.statistics.A,
+          fraction: 0,
         },
         {
           siteName: "B",
@@ -102,8 +153,48 @@ export default {
           hits: 0,
           fraction: 0,
         },
-      ],
-    };
+      ];
+      // console.log(this.pageRankcSim);
+      this.pageRankSim = new PageRankSimulator(n1, this.nodes);
+      this.currentNode = n1;
+    },
+    step() {
+      let nextNode = this.pageRankSim.step();
+      this.$refs.graph.removeHighlights();
+      this.$refs.graph.highlightPath(this.currentNode, nextNode);
+      this.currentNode = nextNode;
+      // console.log(nextNode.name);
+      // console.log(this.data[0].hits);
+    },
+    reset() {},
+    start() {
+      this.timer = setInterval(this.step, 1000);
+    },
+    stop() {
+      clearInterval(this.timer);
+    },
+  },
+  created() {
+    this.init();
+  },
+  computed: {
+    totalHits() {
+      return this.pageRankSim.totalHits;
+    },
+  },
+  mounted() {
+    for (let i = 0; i < 5; i++) {
+      this.$watch("nodes." + i.toString() + ".hits", function (val) {
+        this.$set(this.data[i], "hits", val);
+        this.$set(this.data[i], "fraction", (val * 100) / this.totalHits);
+      });
+    }
+  },
+  watch: {
+    speed(newVal, oldVal) {
+      clearInterval(this.timer);
+      this.timer = setInterval(this.step, 5000 / newVal);
+    },
   },
 };
 </script>

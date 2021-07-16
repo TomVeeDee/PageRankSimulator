@@ -37,8 +37,19 @@ test("connecting nodes error", () => {
   NodeUtils.connect(n1, n2);
 
   expect(()=>NodeUtils.connect(n1,n2)).toThrow("Node 1 already contains node 2 as a toNode");
+});
 
+test("is connected to", () => {
+  let n1 = new Node("A");
+  let n2 = new Node("B");
+  let n3 = new Node("C");
 
+  NodeUtils.connect(n1, n2);
+
+  expect(NodeUtils.isConnectedTo(n1,n2)).toBe(true);
+  expect(NodeUtils.isConnectedTo(n1,n2)).toBe(true);
+  expect(NodeUtils.isConnectedTo(n1,n1)).toBe(false);
+  expect(NodeUtils.isConnectedTo(n1,n3)).toBe(false);
 });
 
 test("removing connections", () => {

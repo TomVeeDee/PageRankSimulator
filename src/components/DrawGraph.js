@@ -1,31 +1,96 @@
 /* eslint-disable no-unused-vars */
-import * as PIXI from "pixi.js";
-import * as math from "mathjs";
+import NodeC from "./canvascomponents/NodeC.js";
+import ConnectorC from "./canvascomponents/ConnectorC.js";
 
-export default function drawGraph(app) {
-  const stage = app.stage;
-  let graphics = new PIXI.Graphics();
+export class GraphDrawer {
+  constructor(app, nodes) {
+    this.nodes = nodes;
+    this.nodeCs = [];
+    this.connectors = [];
+    this.hightlighted = [];
+    this.nodeMapping = new Map();
+    this.app = app;
+    // this.connectorMapping = new Map(); no longer needed, solved in an easier way
 
-  let vertices = getVertices(app.screen.width / 6, {
-    x: app.screen.width / 2,
-    y: app.screen.height / 2,
-  });
-  graphics.beginFill(0xde3249);
-  for (const cor of vertices) {
-    graphics.drawCircle(cor[0], cor[1], 10);
+    if (nodes.length != 5) {
+      throw "nodes doesn't contain 5 items. This graphdrawer is designed to work with exactly 5 nodes only.";
+    }
+
+    let minDim = (app.screen.height < app.screen.width) ? app.screen.height : app.screen.width;
+    let vertices = this._regPolyGetVertices(minDim / 3, {
+      x: app.screen.width / 2,
+      y: app.screen.height / 2,
+    });
+
+    for (const [i, vert] of vertices.entries()) {
+      let n = new NodeC(app.stage, nodes[i].name, [vert[0], vert[1]]);
+      this.nodeMapping.set(nodes[i], n);
+      this.nodeCs.push(n);
+    }
+
+    for (const [i, node] of this.nodeCs.entries()) {
+      let reducedList = this.nodeCs.slice();
+      reducedList.splice(i, 1);
+
+      for (const toNode of reducedList) {
+        let con = new ConnectorC(app.stage, node, toNode);
+        node.connectorCs.push(con);
+        this.connectors.push(con);
+      }
+    }
   }
-  graphics.endFill();
 
-  drawConnections(stage, vertices[0], vertices[1]);
-  stage.addChild(graphics);
+  updateScaling() {
+    let minDim = (this.app.screen.height < this.app.screen.width) ? this.app.screen.height : this.app.screen.width;
+    let vertices = this._regPolyGetVertices(minDim / 3, {
+      x: this.app.screen.width / 2,
+      y: this.app.screen.height / 2,
+    });
+    for (const [i, vert] of vertices.entries()) {
+      this.nodeCs[i].location[0] = vert[0];
+      this.nodeCs[i].location[1] = vert[1];
+    }
+  }
 
-  // eslint-disable-next-line no-unused-vars
-  function getVertices(
-    radius,
-    center = { x: 0, y: 0 },
-    rot = 0,
-    vertCount = 5
-  ) {
+  highlight(node1, node2) {
+    let node1C = this.nodeMapping.get(node1);
+    let node2C = this.nodeMapping.get(node2);
+    node2C.state = "active";
+    node2C.draw();
+
+
+    let connection = node1C.connectorCs[node1C.connectorCs.indexOf(node2C)];
+    connection = node1C.connectorCs.find(e =>e.node2 == node2C);
+
+    // we dont check if the connection is active or exist, we assume that this function will never be called on an inactive/non existing connection
+    connection.state = "active";
+    connection.draw();
+
+    this.hightlighted.push(node2C);
+    this.hightlighted.push(connection);
+  }
+
+  removeHighlights() {
+    if(this.hightlighted.length == 0) {
+      return;
+    }
+    // an unactive connection will never be highlighted so its safe to set all components back to default state and redraw them
+    for(const c of this.hightlighted) {
+      c.state = "default";
+      c.draw();
+    }
+  }
+
+  draw() {
+    for (const c of this.connectors) {
+      c.draw();
+    }
+    for (const n of this.nodeCs) {
+      n.draw();
+    }
+  }
+
+  _regPolyGetVertices(radius, center = { x: 0, y: 0 }, rot = 0, vertCount = 5) {
     let vertices = [];
     for (let k = 0; k < 5; k++) {
       let x = center.x + radius * Math.cos(rot + (k * 2 * Math.PI) / vertCount);
@@ -33,67 +98,5 @@ export default function drawGraph(app) {
       vertices.push([x, y]);
     }
     return vertices;
-  }
-
-  function drawConnections(target, vert1, vert2, bending = 20) {
-    let moveOnNormal = (normalLocD, d) => {
-        let moveOnLine = (d) => {
-          return math
-            .chain(vert1)
-            .subtract(vert2)
-            .multiply(d)
-            .add(vert2)
-            .done();
-        };
-        
-        let normalLoc = moveOnLine(normalLocD);
-        let offset = math
-          .chain(vert1)
-          .subtract(vert2)
-          .divide(math.norm(math.subtract(vertices[1], vertices[0])))
-          .rotate(math.pi / 2)
-          .multiply(d)
-          .done();
-  
-        return math.add(normalLoc, offset);
-    };
-
-    let graphics = new PIXI.Graphics();
-    //  draw the bezier
-    graphics.lineStyle(2, 0xffffff, 1);
-    graphics.moveTo(vert1[0], vert1[1]);
-
-
-
-    let controlPt = moveOnNormal(0.5, bending);
-    graphics.bezierCurveTo(
-      controlPt[0],
-      controlPt[1],
-      controlPt[0],
-      controlPt[1],
-      vertices[1][0],
-      vertices[1][1]
-    );
-
-
-
-
-    // draw the arrow
-    let p1 = moveOnNormal(1,20);
-    let p2 = moveOnNormal(1,20);
-    let p3 = moveOnNormal(0.5,0);
-
-    // // draw a shape
-    // graphics.beginFill(0xFF3300);
-    // graphics.lineStyle(4, 0xffd900, 1);
-    // graphics.moveTo(p1[0], p1[1]);
-    // graphics.lineTo(p3[0], p3[1]);
-    // graphics.lineTo(p2[0], p2[1]);
-    // graphics.lineTo(p1[0], p1[1]);
-    // graphics.closePath();
-    // graphics.endFill();
-
-
-    target.addChild(graphics);
   }
 }

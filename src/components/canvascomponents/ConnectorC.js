@@ -2,32 +2,46 @@ import * as math from "mathjs";
 import * as PIXI from "pixi.js";
 import { Bezier } from "bezier-js";
 
-export default class Connector {
+export default class ConnectorC {
   constructor(
     target,
     node1,
     node2,
     onClick = () => {},
-    changeStyleOnClick = true,
+    // old color 0x1976d2
     style = {
       bending: 20,
-      lineOptions: { color: 0x1976d2, width: 3, alpha: 1 },
-      fillOptions: { color: 0x1976d2 },
+      tipLength: 25,
+      arrowWidth: 11,
+      lineOptions: { color: 0x658c14, width: 2, alpha: 1 },
+      fillOptions: { color: 0x658c14 },
     },
+    // old color 0xaecae6
     styleDisabled = {
       bending: 20,
-      lineOptions: { color: 0xaecae6, width: 3, alpha: 1 },
-      fillOptions: { color: 0xaecae6 },
-    }
+      tipLength: 25,
+      arrowWidth: 11,
+      lineOptions: { color: 0xa5ca49, width: 2, alpha: 1 },
+      fillOptions: { color: 0xa5ca49 },
+    },
+    styleActive = {
+      bending: 20,
+      tipLength: 25,
+      arrowWidth: 11,
+      lineOptions: { color: 0xcf2b06, width: 2, alpha: 1 },
+      fillOptions: { color: 0xcf2b06 },
+    },
   ) {
     this.node1 = node1;
     this.node2 = node2;
     this.style = style;
     this.styleDisabled = styleDisabled;
-    this.changeStyleOnClick = changeStyleOnClick;
+    this.styleActive = styleActive;
     this.onClick = onClick;
     this.isActive = true;
     this.target = null; // see this.draw(target)
+
+    this._state = "default";
 
     this.graphics = new PIXI.Graphics();
     // enable interaction and set call function
@@ -37,17 +51,28 @@ export default class Connector {
     target.addChild(this.graphics);
   }
 
+  set state(newState) {
+    if (
+      !(
+        newState === "active" ||
+        newState === "disabled" ||
+        newState === "default"
+      )
+    ) {
+      throw "Invalid state, only state default and active are supported";
+    }
+    this._state = newState; // validation could be checked here such as only allowing non numerical values
+  }
+
   _onClick(self, e) {
     if (this.isActive) {
       if (this.changeStyleOnClick) {
-        console.log("A");
-        this._draw(this.target, this.styleDisabled);
+        this._draw(this.styleDisabled);
       }
       this.isActive = false;
     } else {
       if (this.changeStyleOnClick) {
-        console.log("B");
-        this._draw(this.target, this.style);
+        this._draw(this.style);
       }
       this.isActive = true;
     }
@@ -77,15 +102,27 @@ export default class Connector {
     return math.add(normalLoc, offset);
   }
 
-  draw(target) {
-    this._draw(target, this.style);
-    this.target = target; // buffer target, used for onClick
+  draw() {
+    let style = null;
+    switch (this._state) {
+      case "default":
+        style = this.style;
+        break;
+      case "active":
+        style = this.styleActive;
+        break;
+      case "disabled":
+        style = this.styleDisabled;
+        break;
+    }
+    this._draw(style);
   }
 
-  _draw(target, style) {
+  _draw(style) {
     let vert1 = this.node1.location;
     let vert2 = this.node2.location;
     let graphics = this.graphics;
+
     graphics.clear();
 
     //  draw the bezier
@@ -117,10 +154,11 @@ export default class Connector {
 
     // now calculate the three points for the arrow
     // point in the center of the bezier curve
-    let centerOnBezier = bezier.compute(0.35);
+    let bezierLength = bezier.length();
+    let centerOnBezier = bezier.compute(0.5 + style.tipLength / bezierLength);
 
-    let offsetSide1 = bezier.offset(0.5, 12);
-    let offsetSide2 = bezier.offset(0.5, -12);
+    let offsetSide1 = bezier.offset(0.5, style.arrowWidth / 2);
+    let offsetSide2 = bezier.offset(0.5, -style.arrowWidth / 2);
 
     // draw the arrow
     let p1 = centerOnBezier;

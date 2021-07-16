@@ -80,7 +80,7 @@ test('simple test two nodes no alpha', () => {
     expect(pageRank.relativeHits(n1)).toBe(0);
 
     // check if it convergences correctly
-    const STEPS = 8000;
+    const STEPS = 15000;
     const ALPHA = 0.85;
   
     for (let step = 0; step < STEPS; step++) {

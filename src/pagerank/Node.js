@@ -3,8 +3,8 @@ export class Node {
         this.connections = [];
         this.name = name;
         this.hits = 0;
+        this._state = "default";
     }
-
 }
 
 export let NodeUtils = {
@@ -29,5 +29,8 @@ export let NodeUtils = {
             return null;
         }
         return nodeList[index];
+    },
+    isConnectedTo(node1, node2 ) {
+        return node1.connections.includes(node2);
     }
 }
