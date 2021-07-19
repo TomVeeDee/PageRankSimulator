@@ -1,7 +1,7 @@
 import * as math from "mathjs";
 import * as PIXI from "pixi.js";
 import { Bezier } from "bezier-js";
-import { Circle } from "pixi.js";
+
 
 export default class ConnectorC {
   constructor(
@@ -70,8 +70,7 @@ export default class ConnectorC {
 
   _moveOnNormal(vert1, vert2, t, d) {
     let moveOnLine = (d) => {
-      return math
-        .chain(vert1)
+      return math.chain(vert1)
         .subtract(vert2)
         .multiply(d)
         .add(vert2)
@@ -79,8 +78,7 @@ export default class ConnectorC {
     };
 
     let normalLoc = moveOnLine(t);
-    let offset = math
-      .chain(vert1)
+    let offset = math.chain(vert1)
       .subtract(vert2)
       .divide(math.norm(math.subtract(vert1, vert2)))
       .rotate(math.pi / 2)
@@ -171,6 +169,6 @@ export default class ConnectorC {
     // graphics.lineStyle(2, 0x0);
     // graphics.drawCircle(centerOfArrow.x, centerOfArrow.y, 20); //TODO hard coded
     // graphics.endFill();
-    graphics.hitArea = new Circle(centerOfArrow.x, centerOfArrow.y, 20);
+    graphics.hitArea = new PIXI.Circle(centerOfArrow.x, centerOfArrow.y, 20);
   }
 }
