@@ -1,16 +1,17 @@
 import * as math from "mathjs";
 import * as PIXI from "pixi.js";
 import { Bezier } from "bezier-js";
+import { Circle } from "pixi.js";
 
 export default class ConnectorC {
   constructor(
     target,
     node1,
     node2,
-    onClick = (self,e) => {},
+    onClick = (self, e) => {},
     // old color 0x1976d2
     style = {
-      bending: 20,
+      bending: 35,
       tipLength: 25,
       arrowWidth: 11,
       lineOptions: { color: 0x1976d2, width: 2, alpha: 1 },
@@ -18,19 +19,19 @@ export default class ConnectorC {
     },
     // old color 0xaecae6
     styleDisabled = {
-      bending: 20,
+      bending: 35,
       tipLength: 25,
       arrowWidth: 11,
       lineOptions: { color: 0xaecae6, width: 2, alpha: 1 },
       fillOptions: { color: 0xaecae6 },
     },
     styleActive = {
-      bending: 20,
+      bending: 35,
       tipLength: 25,
       arrowWidth: 12,
-      lineOptions: { color: 0x4CAF50, width: 4, alpha: 1 },
-      fillOptions: { color: 0x4CAF50 },
-    },
+      lineOptions: { color: 0x4caf50, width: 4, alpha: 1 },
+      fillOptions: { color: 0x4caf50 },
+    }
   ) {
     this.node1 = node1;
     this.node2 = node2;
@@ -45,7 +46,7 @@ export default class ConnectorC {
     this.graphics = new PIXI.Graphics();
     // enable interaction and set call function
     this.graphics.interactive = true;
-    this.graphics.buttonMode = true;
+    // this.graphics.buttonMode = true;
     this.graphics.on("pointertap", (e) => this.onClick(this, e));
     target.addChild(this.graphics);
   }
@@ -152,6 +153,7 @@ export default class ConnectorC {
     let p2 = offsetSide1;
     let p3 = offsetSide2;
 
+    graphics.lineStyle(style.lineOptions);
     graphics.beginFill(style.fillOptions.color);
     graphics.moveTo(p1.x, p1.y);
     graphics.lineTo(p3.x, p3.y);
@@ -159,5 +161,16 @@ export default class ConnectorC {
     graphics.lineTo(p1.x, p1.y);
     graphics.closePath();
     graphics.endFill();
+
+    //make interaction a bit easier on mobile devices by increasing touchable area at the arrow
+    let centerOfArrow = bezier.compute(
+      0.5 + style.tipLength / (2 * bezierLength)
+    );
+
+    // graphics.beginFill(0xffffff);
+    // graphics.lineStyle(2, 0x0);
+    // graphics.drawCircle(centerOfArrow.x, centerOfArrow.y, 20); //TODO hard coded
+    // graphics.endFill();
+    graphics.hitArea = new Circle(centerOfArrow.x, centerOfArrow.y, 20);
   }
 }

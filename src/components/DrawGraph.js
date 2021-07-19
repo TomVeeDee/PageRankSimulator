@@ -3,27 +3,31 @@ import NodeC from "./canvascomponents/NodeC.js";
 import ConnectorC from "./canvascomponents/ConnectorC.js";
 import {NodeUtils} from "../pagerank/Node"
 export class GraphDrawer {
-  constructor(app, nodes) {
+  constructor(container, nodes, width=1000, height=1000) {
     this.nodes = nodes;
     this.nodeCs = [];
     this.connectors = [];
     this.hightlighted = [];
     this.nodeMapping = new Map();
-    this.app = app;
+    this.container = container;
+    this.width = width;
+    this.height = height;
     // this.connectorMapping = new Map(); no longer needed, solved in an easier way
+
+    container.sortableChildren = true;
 
     if (nodes.length != 5) {
       throw "nodes doesn't contain 5 items. This graphdrawer is designed to work with exactly 5 nodes only.";
     }
 
-    let minDim = (app.screen.height < app.screen.width) ? app.screen.height : app.screen.width;
-    let vertices = this._regPolyGetVertices(minDim / 3, {
-      x: app.screen.width / 2,
-      y: app.screen.height / 2,
+    let minDim = (height < width) ? height : width;
+    let vertices = this._regPolyGetVertices(minDim / 2, {
+      x: width / 2,
+      y: height / 2,
     });
 
     for (const [i, vert] of vertices.entries()) {
-      let n = new NodeC(app.stage, nodes[i].name, [vert[0], vert[1]]);
+      let n = new NodeC(container, nodes[i].name, [vert[0], vert[1]]);
       this.nodeMapping.set(nodes[i], n);
       this.nodeCs.push(n);
     }
@@ -33,7 +37,7 @@ export class GraphDrawer {
       reducedList.splice(i, 1);
 
       for (const toNode of reducedList) {
-        let con = new ConnectorC(app.stage, node, toNode);
+        let con = new ConnectorC(container, node, toNode);
         con.onClick = (con,e) => this._connectionUpdate(con,e,this);
         node.connectorCs.push(con);
         this.connectors.push(con);

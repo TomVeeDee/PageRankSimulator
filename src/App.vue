@@ -1,75 +1,79 @@
 <template>
   <v-app>
-    <v-row>
-      <!-- Canvas -->
-      <v-col cols="8"><Graph ref="graph" :nodes="nodes"></Graph></v-col>
-      <!-- Data and controls -->
-      <v-col cols="4">
-        <!-- table -->
-        <v-row>
-          <v-col>
-            <v-data-table
-              :headers="headers"
-              :items="data"
-              :items-per-page="-1"
-              hide-default-footer
-              disable-pagination
-              disable-sort
-            >
-              <template v-slot:item.fraction="{ item }">
-                <v-progress-linear :value="item.fraction" height="25">
-                  <template v-slot:default="{ value }">
-                    <strong>{{ Math.ceil(value) }}%</strong>
-                  </template></v-progress-linear
-                >
-              </template>
-              <template v-slot:body.append>
-                <tr class="pa-0">
-                  <th>Totaal hits</th>
-                  <th>{{ totalHits }}</th>
-                  <th></th>
-                </tr>
-              </template>
-            </v-data-table>
-          </v-col>
-        </v-row>
-        <!-- control buttons -->
-        <v-row>
-          <v-col>
-            <v-btn color="success" @click="start"> start </v-btn>
-            <v-btn class="ma-2" color="error" @click="stop"> stop </v-btn>
-            <v-btn color="primary" @click="reset"> reset </v-btn>
-          </v-col>
-        </v-row>
-        <!-- sliders -->
-        <v-slider v-model="speed" label="snelheid" min="1" max="100" step="5"
-          ><template v-slot:append>
-            <v-text-field
-              v-model="speed"
-              class="mt-0 pt-0"
-              type="number"
-              style="width: 60px"
-            ></v-text-field> </template
-        ></v-slider>
-        <v-slider v-model="alpha" label="alpha" min="0" max="1" step="0.05"
-          ><template v-slot:append>
-            <v-text-field
-              v-model="alpha"
-              class="mt-0 pt-0"
-              type="number"
-              style="width: 60px"
-            ></v-text-field> </template
-        ></v-slider>
-        <v-row>
-          <v-col
-            ><small
-              >klik op de pijlen om verbindingen te activeren of te
-              deactiveren</small
-            >
-          </v-col>
-        </v-row>
-      </v-col>
-    </v-row>
+    <v-container>
+      <v-row>
+        <!-- Canvas -->
+        <v-col xl="8" lg="8" md="12" sm="12" cols="12">
+          <Graph ref="graph" :nodes="nodes"></Graph>
+        </v-col>
+        <!-- Data and controls -->
+        <v-col xl="4" lg="4" md="12" sm="12" cols="12">
+          <!-- table -->
+          <v-row>
+            <v-col>
+              <v-data-table
+                :headers="headers"
+                :items="data"
+                :items-per-page="-1"
+                hide-default-footer
+                disable-pagination
+                disable-sort
+              >
+                <template v-slot:item.fraction="{ item }">
+                  <v-progress-linear :value="item.fraction" height="25">
+                    <template v-slot:default="{ value }">
+                      <strong>{{ Math.ceil(value) }}%</strong>
+                    </template></v-progress-linear
+                  >
+                </template>
+                <template v-slot:body.append>
+                  <tr class="pa-0">
+                    <th>Totaal hits</th>
+                    <th>{{ totalHits }}</th>
+                    <th></th>
+                  </tr>
+                </template>
+              </v-data-table>
+            </v-col>
+          </v-row>
+          <!-- control buttons -->
+          <v-row>
+            <v-col>
+              <v-btn color="success" @click="start"> start </v-btn>
+              <v-btn class="ma-2" color="error" @click="stop"> stop </v-btn>
+              <v-btn color="primary" @click="reset"> reset </v-btn>
+            </v-col>
+          </v-row>
+          <!-- sliders -->
+          <v-slider v-model="speed" label="snelheid" min="1" max="100" step="5"
+            ><template v-slot:append>
+              <v-text-field
+                v-model="speed"
+                class="mt-0 pt-0"
+                type="number"
+                style="width: 60px"
+              ></v-text-field> </template
+          ></v-slider>
+          <v-slider v-model="alpha" label="alpha" min="0" max="1" step="0.05"
+            ><template v-slot:append>
+              <v-text-field
+                v-model="alpha"
+                class="mt-0 pt-0"
+                type="number"
+                style="width: 60px"
+              ></v-text-field> </template
+          ></v-slider>
+          <v-row>
+            <v-col
+              ><small
+                >klik op de pijlen om verbindingen te activeren of te
+                deactiveren</small
+              >
+            </v-col>
+          </v-row>
+        </v-col>
+      </v-row>
+    </v-container>
   </v-app>
 </template>
 
@@ -184,6 +188,7 @@ export default {
       this.init();
     },
     start() {
+      this.step(); // otherwise nothing happens for first x seconds
       this.timer = setInterval(this.step, 5000 / 1);
     },
     stop() {
@@ -205,6 +210,9 @@ export default {
         let frac = this.totalHits == 0 ? 0 : (val * 100) / this.totalHits;
         this.$set(this.data[i], "fraction", frac);
       });
+
+      // document.getElementsByTagName("BODY")[0].style.touchAction =
+      //   "auto !important";
     }
   },
   watch: {
