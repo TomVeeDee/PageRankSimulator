@@ -86,6 +86,7 @@ export default {
   components: { Graph },
   data() {
     return {
+      running: false,
       nodes: null,
       pageRankSim: null,
       speed: 1,
@@ -105,13 +106,31 @@ export default {
     };
   },
   methods: {
-    init() {
+    init(reset = false) {
       const NODE_NAMES = ["A", "B", "C", "D", "E"];
-      let n1 = new Node(NODE_NAMES[0]);
-      let n2 = new Node(NODE_NAMES[1]);
-      let n3 = new Node(NODE_NAMES[2]);
-      let n4 = new Node(NODE_NAMES[3]);
-      let n5 = new Node(NODE_NAMES[4]);
+      let n1;
+      let n2;
+      let n3;
+      let n4;
+      let n5;
+      if (reset) {
+        n1 = this.nodes[0];
+        n2 = this.nodes[1];
+        n3 = this.nodes[2];
+        n4 = this.nodes[3];
+        n5 = this.nodes[4];
+        NodeUtils.clearConnections(n1);
+        NodeUtils.clearConnections(n2);
+        NodeUtils.clearConnections(n3);
+        NodeUtils.clearConnections(n4);
+        NodeUtils.clearConnections(n5);
+      } else {
+        n1 = new Node(NODE_NAMES[0]);
+        n2 = new Node(NODE_NAMES[1]);
+        n3 = new Node(NODE_NAMES[2]);
+        n4 = new Node(NODE_NAMES[3]);
+        n5 = new Node(NODE_NAMES[4]);
+      }
 
       NodeUtils.connect(n1, n2);
       NodeUtils.connect(n1, n3);
@@ -138,7 +157,6 @@ export default {
       NodeUtils.connect(n5, n3);
       NodeUtils.connect(n5, n4);
 
-      this.$set(this.statistics, "A", 0);
       this.nodes = [n1, n2, n3, n4, n5];
       this.data = [
         {
@@ -185,13 +203,19 @@ export default {
     },
     reset() {
       this.stop();
-      this.init();
+      this.init(true);
+      this.$refs.graph.removeHighlights();
     },
     start() {
+      if (this.running) {
+        return;
+      }
+      this.running = true;
       this.step(); // otherwise nothing happens for first x seconds
       this.timer = setInterval(this.step, 5000 / 1);
     },
     stop() {
+      this.running = false;
       clearInterval(this.timer);
     },
   },

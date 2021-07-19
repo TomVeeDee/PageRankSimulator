@@ -8,6 +8,9 @@ export class Node {
 }
 
 export let NodeUtils = {
+    clearConnections(node) {
+        node.connections = [];
+    },
     connect(node1, node2) {
         if(node1.connections.includes(node2)) {
             throw "Node 1 already contains node 2 as a toNode";
