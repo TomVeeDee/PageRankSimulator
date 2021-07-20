@@ -129,10 +129,15 @@ export default {
           fraction: 0,
         },
       ],
-      statistics: {},
     };
   },
   methods: {
+    restStatistics() {
+      for (const n of this.nodes) {
+        n.hits = 0;
+      }
+      this.pageRankSim.totalHits = 0;
+    },
     init(reset = false) {
       const NODE_NAMES = ["A", "B", "C", "D", "E"];
       let n1;
@@ -235,9 +240,8 @@ export default {
     },
     reset() {
       this.stop();
-      this.init(true);
+      this.restStatistics();
       this.$refs.graph.removeHighlights();
-      this.$refs.graph.resetState();
     },
     start() {
       if (this.running) {

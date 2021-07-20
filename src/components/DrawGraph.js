@@ -45,16 +45,6 @@ export class GraphDrawer {
       }
     }
   }
-  resetState() {
-    for (const n of this.nodeCs) {
-      n.state = "default";
-      n.draw();
-    }
-    for (const c of this.connectors) {
-      c.state = "default";
-      c.draw();
-    }
-  }
   _connectionUpdate(con, e, self) {
     let node1 = [...self.nodeMapping.entries()].find(
       ([k, v]) => v == con.node1
@@ -111,10 +101,13 @@ export class GraphDrawer {
       return;
     }
     // an unactive connection will never be highlighted so its safe to set all components back to default state and redraw them
-    for (const c of this.hightlighted) {
+    while(this.hightlighted.length != 0) {
+      const c = this.hightlighted.pop();
+      console.log(c.state);
       c.state = "default";
       c.draw();
     }
+
   }
 
   draw() {
