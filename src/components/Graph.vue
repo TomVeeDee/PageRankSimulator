@@ -94,7 +94,7 @@ export default {
     _positionInContainer() {
       this.graphContainer.calculateBounds();
       this.graphContainer.x =
-        this.app.screen.width / 2 - this.graphContainer.width / 2 - 20; //TODO hard coded
+        this.app.screen.width / 2 - this.graphContainer.width / 2;
       this.graphContainer.y =
         this.app.screen.height / 2 - this.graphContainer.height / 2;
     },
@@ -104,6 +104,9 @@ export default {
     },
     removeHighlights() {
       this.drawer.removeHighlights();
+    },
+    resetState() {
+      this.drawer.resetState();
     },
   },
 

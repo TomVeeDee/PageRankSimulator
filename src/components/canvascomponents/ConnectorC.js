@@ -1,5 +1,5 @@
 import * as math from "mathjs";
-import * as PIXI from "pixi.js";
+import * as PIXI from "./pixi.js";
 import { Bezier } from "bezier-js";
 
 

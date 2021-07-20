@@ -60,14 +60,15 @@
                 v-model="alpha"
                 class="mt-0 pt-0"
                 type="number"
+                step="0.05"
                 style="width: 60px"
               ></v-text-field> </template
           ></v-slider>
           <v-row>
             <v-col
               ><small
-                >klik op de pijlen om verbindingen te activeren of te
-                deactiveren</small
+                >Klik op de pijlen om verbindingen te activeren of te
+                deactiveren.</small
               >
             </v-col>
           </v-row>
@@ -101,7 +102,33 @@ export default {
         { text: "hits", value: "hits" },
         { text: "verdeling", value: "fraction" },
       ],
-      data: [],
+      data: [
+        {
+          siteName: "A",
+          hits: 0,
+          fraction: 0,
+        },
+        {
+          siteName: "B",
+          hits: 0,
+          fraction: 0,
+        },
+        {
+          siteName: "C",
+          hits: 0,
+          fraction: 0,
+        },
+        {
+          siteName: "D",
+          hits: 0,
+          fraction: 0,
+        },
+        {
+          siteName: "E",
+          hits: 0,
+          fraction: 0,
+        },
+      ],
       statistics: {},
     };
   },
@@ -124,6 +151,11 @@ export default {
         NodeUtils.clearConnections(n3);
         NodeUtils.clearConnections(n4);
         NodeUtils.clearConnections(n5);
+        n1.hits = 0;
+        n2.hits = 0;
+        n3.hits = 0;
+        n4.hits = 0;
+        n5.hits = 0;
       } else {
         n1 = new Node(NODE_NAMES[0]);
         n2 = new Node(NODE_NAMES[1]);
@@ -161,7 +193,7 @@ export default {
       this.data = [
         {
           siteName: "A",
-          hits: this.statistics.A,
+          hits: 0,
           fraction: 0,
         },
         {
@@ -205,6 +237,7 @@ export default {
       this.stop();
       this.init(true);
       this.$refs.graph.removeHighlights();
+      this.$refs.graph.resetState();
     },
     start() {
       if (this.running) {
@@ -212,7 +245,7 @@ export default {
       }
       this.running = true;
       this.step(); // otherwise nothing happens for first x seconds
-      this.timer = setInterval(this.step, 5000 / 1);
+      this.timer = setInterval(this.step, 5000 / this.speed);
     },
     stop() {
       this.running = false;
@@ -234,15 +267,22 @@ export default {
         let frac = this.totalHits == 0 ? 0 : (val * 100) / this.totalHits;
         this.$set(this.data[i], "fraction", frac);
       });
-
-      // document.getElementsByTagName("BODY")[0].style.touchAction =
-      //   "auto !important";
     }
+
+    // update all fracs
+    this.$watch("pageRankSim.totalHits", function (val) {
+      for (let i = 0; i < 5; i++) {
+        let frac = val == 0 ? 0 : (this.data[i].hits * 100) / val;
+        this.$set(this.data[i], "fraction", frac);
+      }
+    });
   },
   watch: {
     speed(newVal, oldVal) {
-      clearInterval(this.timer);
-      this.timer = setInterval(this.step, 5000 / newVal);
+      if (this.running) {
+        clearInterval(this.timer);
+        this.timer = setInterval(this.step, 5000 / newVal);
+      }
     },
   },
 };

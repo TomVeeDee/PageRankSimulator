@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
 import NodeC from "./canvascomponents/NodeC.js";
 import ConnectorC from "./canvascomponents/ConnectorC.js";
-import {NodeUtils} from "../pagerank/Node"
+import { NodeUtils } from "../pagerank/Node";
 export class GraphDrawer {
-  constructor(container, nodes, width=1000, height=1000) {
+  constructor(container, nodes, width = 1000, height = 1000) {
     this.nodes = nodes;
     this.nodeCs = [];
     this.connectors = [];
@@ -20,8 +20,9 @@ export class GraphDrawer {
       throw "nodes doesn't contain 5 items. This graphdrawer is designed to work with exactly 5 nodes only.";
     }
 
-    let minDim = (height < width) ? height : width;
-    let vertices = this._regPolyGetVertices(minDim / 2, {
+    let minDim = height < width ? height : width;
+    let vertices = this._regPolyGetVertices(minDim / 2 - 20, {
+      //TODO hard coded, must be the radius of the circles or not?
       x: width / 2,
       y: height / 2,
     });
@@ -38,17 +39,31 @@ export class GraphDrawer {
 
       for (const toNode of reducedList) {
         let con = new ConnectorC(container, node, toNode);
-        con.onClick = (con,e) => this._connectionUpdate(con,e,this);
+        con.onClick = (con, e) => this._connectionUpdate(con, e, this);
         node.connectorCs.push(con);
         this.connectors.push(con);
       }
     }
   }
+  resetState() {
+    for (const n of this.nodeCs) {
+      n.state = "default";
+      n.draw();
+    }
+    for (const c of this.connectors) {
+      c.state = "default";
+      c.draw();
+    }
+  }
   _connectionUpdate(con, e, self) {
-    let node1 = [...self.nodeMapping.entries()].find(([k, v]) => v == con.node1)[0];
-    let node2 = [...self.nodeMapping.entries()].find(([k, v]) => v == con.node2)[0];
+    let node1 = [...self.nodeMapping.entries()].find(
+      ([k, v]) => v == con.node1
+    )[0];
+    let node2 = [...self.nodeMapping.entries()].find(
+      ([k, v]) => v == con.node2
+    )[0];
 
-    if(con.state === "disabled") {
+    if (con.state === "disabled") {
       con.state = "default";
       NodeUtils.connect(node1, node2);
     } else {
@@ -57,10 +72,12 @@ export class GraphDrawer {
     }
 
     con.draw();
-
   }
   updateScaling() {
-    let minDim = (this.app.screen.height < this.app.screen.width) ? this.app.screen.height : this.app.screen.width;
+    let minDim =
+      this.app.screen.height < this.app.screen.width
+        ? this.app.screen.height
+        : this.app.screen.width;
     let vertices = this._regPolyGetVertices(minDim / 3, {
       x: this.app.screen.width / 2,
       y: this.app.screen.height / 2,
@@ -80,22 +97,21 @@ export class GraphDrawer {
 
     if (hightLightCon) {
       let connection = node1C.connectorCs[node1C.connectorCs.indexOf(node2C)];
-      connection = node1C.connectorCs.find(e =>e.node2 == node2C);
-  
+      connection = node1C.connectorCs.find((e) => e.node2 == node2C);
+
       // we dont check if the connection is active or exist, we assume that this function will never be called on an inactive/non existing connection
       connection.state = "active";
       connection.draw();
       this.hightlighted.push(connection);
     }
-
   }
 
   removeHighlights() {
-    if(this.hightlighted.length == 0) {
+    if (this.hightlighted.length == 0) {
       return;
     }
     // an unactive connection will never be highlighted so its safe to set all components back to default state and redraw them
-    for(const c of this.hightlighted) {
+    for (const c of this.hightlighted) {
       c.state = "default";
       c.draw();
     }
