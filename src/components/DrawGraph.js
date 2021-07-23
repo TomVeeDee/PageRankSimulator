@@ -103,7 +103,6 @@ export class GraphDrawer {
     // an unactive connection will never be highlighted so its safe to set all components back to default state and redraw them
     while(this.hightlighted.length != 0) {
       const c = this.hightlighted.pop();
-      console.log(c.state);
       c.state = "default";
       c.draw();
     }

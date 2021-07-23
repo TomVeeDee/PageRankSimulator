@@ -41,7 +41,10 @@
             <v-col>
               <v-btn color="success" @click="start"> start </v-btn>
               <v-btn class="ma-2" color="error" @click="stop"> stop </v-btn>
-              <v-btn color="primary" @click="reset"> reset </v-btn>
+              <v-btn class="ma-2" color="primary" @click="reset"> reset </v-btn>
+              <v-btn icon color="primary">
+                <v-icon large>mdi-help-circle</v-icon>
+              </v-btn>
             </v-col>
           </v-row>
           <!-- sliders -->

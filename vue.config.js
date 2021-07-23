@@ -2,5 +2,6 @@ module.exports = {
   transpileDependencies: [
     'vuetify'
   ],
-  // publicPath: './'
+  filenameHashing: false,
+  publicPath: '/onderwijs/juniorcollege/STEM-Life-Sciences/pagerank/'
 }
