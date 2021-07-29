@@ -34,6 +34,7 @@ export default class NodeC {
 
     this.nameText = new PIXI.Text(this.name, this.style.textStyle);
     this.nameText.zIndex = this.style.zIndex;
+    this.nameText.calculateBounds();
     
     this.container.zIndex = this.style.zIndex;
     this.container.sortableChildren = true;

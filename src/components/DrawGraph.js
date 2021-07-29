@@ -9,6 +9,7 @@ export class GraphDrawer {
     this.connectors = [];
     this.hightlighted = [];
     this.nodeMapping = new Map();
+    this.iNodeMapping = new Map();
     this.container = container;
     this.width = width;
     this.height = height;
@@ -21,15 +22,18 @@ export class GraphDrawer {
     }
 
     let minDim = height < width ? height : width;
-    let vertices = this._regPolyGetVertices(minDim / 2 - 20, {
+    let rotation = Math.PI*54/180;
+    let centerY = height - minDim/2-20;
+    let vertices = this._regPolyGetVertices(minDim / 2 - 25, {
       //TODO hard coded, must be the radius of the circles or not?
       x: width / 2,
-      y: height / 2,
-    });
+      y: centerY,
+    },rotation);
 
     for (const [i, vert] of vertices.entries()) {
       let n = new NodeC(container, nodes[i].name, [vert[0], vert[1]]);
       this.nodeMapping.set(nodes[i], n);
+      this.iNodeMapping.set(n, nodes[i]);
       this.nodeCs.push(n);
     }
 
@@ -104,6 +108,22 @@ export class GraphDrawer {
     while(this.hightlighted.length != 0) {
       const c = this.hightlighted.pop();
       c.state = "default";
+      c.draw();
+    }
+
+  }
+
+  updateState() {
+    // console.log(this.connectors);
+    for( const c of this.connectors) {
+      let n1 = this.iNodeMapping.get(c.node1)
+      let n2 = this.iNodeMapping.get(c.node2)
+      if(NodeUtils.isConnectedTo(n1,n2)) {
+        c.state = "default";
+      }
+      else {
+        c.state = "disabled"
+      }
       c.draw();
     }
 

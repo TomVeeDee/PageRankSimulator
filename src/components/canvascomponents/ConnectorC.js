@@ -59,7 +59,7 @@ export default class ConnectorC {
         newState === "default"
       )
     ) {
-      throw "Invalid state, only state default and active are supported";
+      throw "Invalid state, only state default, disabled and active are supported";
     }
     this._state = newState; // validation could be checked here such as only allowing non numerical values
   }
