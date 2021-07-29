@@ -26,10 +26,10 @@
                     height="25"
                   >
                     <template v-slot:default="{ value }">
-                      <strong>{{ Math.ceil(value) }}%</strong>
+                      <strong>{{ value.toFixed(1) }}%</strong>
                     </template></v-progress-linear
                   >
-                  <strong v-else>{{ Math.ceil(item.fraction) }}%</strong>
+                  <strong v-else>{{ item.fraction.toFixed(1) }}%</strong>
                 </template>
                 <template v-slot:body.append>
                   <tr class="pa-0">
@@ -140,8 +140,13 @@ import { Node, NodeUtils } from "./pagerank/Node";
 import { PageRankSimulator } from "./pagerank/PageRankSimulator";
 import { PRESETS } from "./presets";
 
+const MIN_SPEED = 2000; // in ms, range is from MIN_SPEED to MIN_SPEED / 100
+
 export default {
   components: { Graph },
+  meta: {
+    title: "Login",
+  },
   data() {
     return {
       infoDialog: false,
@@ -195,11 +200,11 @@ export default {
       this.stop();
       this.reset();
 
-      let n1 = this.nodes[0];
-      let n2 = this.nodes[1];
-      let n3 = this.nodes[2];
-      let n4 = this.nodes[3];
-      let n5 = this.nodes[4];
+      let n1 = this.nodes[3];
+      let n2 = this.nodes[4];
+      let n3 = this.nodes[0];
+      let n4 = this.nodes[1];
+      let n5 = this.nodes[2];
       NodeUtils.clearConnections(n1);
       NodeUtils.clearConnections(n2);
       NodeUtils.clearConnections(n3);
@@ -273,7 +278,7 @@ export default {
       NodeUtils.connect(n5, n3);
       NodeUtils.connect(n5, n4);
 
-      this.nodes = [n1, n2, n3, n4, n5];
+      this.nodes = [n3, n4, n5, n1, n2];
       this.data = [
         {
           siteName: "A",
@@ -302,8 +307,10 @@ export default {
         },
       ];
       // console.log(this.pageRankcSim);
-      this.pageRankSim = new PageRankSimulator(n1, this.nodes);
-      this.currentNode = n1;
+      let randomStartN =
+        this.nodes[Math.floor(Math.random() * this.nodes.length)];
+      this.pageRankSim = new PageRankSimulator(randomStartN, this.nodes);
+      this.currentNode = randomStartN;
     },
     step() {
       let nextNode = this.pageRankSim.step(this.alpha);
@@ -328,7 +335,7 @@ export default {
       }
       this.running = true;
       this.step(); // otherwise nothing happens for first x seconds
-      this.timer = setInterval(this.step, 5000 / this.speed);
+      this.timer = setInterval(this.step, MIN_SPEED / this.speed);
     },
     stop() {
       this.running = false;
@@ -336,6 +343,7 @@ export default {
     },
   },
   created() {
+    document.title = "PageRank";
     this.init();
   },
   computed: {
@@ -370,7 +378,7 @@ export default {
     speed(newVal, oldVal) {
       if (this.running) {
         clearInterval(this.timer);
-        this.timer = setInterval(this.step, 5000 / newVal);
+        this.timer = setInterval(this.step, MIN_SPEED / newVal);
       }
     },
   },

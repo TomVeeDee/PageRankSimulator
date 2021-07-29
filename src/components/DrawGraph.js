@@ -3,6 +3,13 @@ import NodeC from "./canvascomponents/NodeC.js";
 import ConnectorC from "./canvascomponents/ConnectorC.js";
 import { NodeUtils } from "../pagerank/Node";
 export class GraphDrawer {
+  /**
+   * 
+   * @param {PXI.Stage} container 
+   * @param {Array} nodes 
+   * @param {number} width 
+   * @param {number} height 
+   */
   constructor(container, nodes, width = 1000, height = 1000) {
     this.nodes = nodes;
     this.nodeCs = [];
@@ -67,6 +74,10 @@ export class GraphDrawer {
 
     con.draw();
   }
+
+  /**
+   * Rescale the drawings in the canvas based on the screen size
+   */
   updateScaling() {
     let minDim =
       this.app.screen.height < this.app.screen.width
@@ -82,6 +93,12 @@ export class GraphDrawer {
     }
   }
 
+  /**
+   * Highlight a path on the graph, all highlights are saved and can be removed later by @see removeHighlights
+   * @param {Node} node1 The node from with the highlight starts
+   * @param {Node} node2 The node the highlight goes to
+   * @param {boolean} hightLightCon If true the connection will be highlighted too
+   */
   highlight(node1, node2, hightLightCon = true) {
     let node1C = this.nodeMapping.get(node1);
     let node2C = this.nodeMapping.get(node2);
@@ -99,7 +116,12 @@ export class GraphDrawer {
       this.hightlighted.push(connection);
     }
   }
-
+  
+  /**
+   * Removes the highlights, if any
+   * @see highlight
+   * @returns nothing
+   */
   removeHighlights() {
     if (this.hightlighted.length == 0) {
       return;
@@ -113,6 +135,11 @@ export class GraphDrawer {
 
   }
 
+  /**
+   * Updates the connection state (default/disabled) based on the underlying data model.
+   * This function must be called afther altering the underlying node model
+   * @see this.nodes
+   */
   updateState() {
     // console.log(this.connectors);
     for( const c of this.connectors) {
@@ -129,6 +156,9 @@ export class GraphDrawer {
 
   }
 
+  /**
+   * Draw all components on the canvas
+   */
   draw() {
     for (const c of this.connectors) {
       c.draw();
@@ -138,6 +168,14 @@ export class GraphDrawer {
     }
   }
 
+  /**
+   * Calculates the points (x,y) of a regular polygon.
+   * @param {number} radius The radius of the circle that intersects with all points of the polygon
+   * @param {object} center The center of the polygon, an object containing an x and y, both numbers
+   * @param {number} rot The rotation of the polygon around its center
+   * @param {number} vertCount The vertex count
+   * @returns An array containing the points of the polygon. Each element is an array of the form [x, y]
+   */
   _regPolyGetVertices(radius, center = { x: 0, y: 0 }, rot = 0, vertCount = 5) {
     let vertices = [];
     for (let k = 0; k < 5; k++) {
