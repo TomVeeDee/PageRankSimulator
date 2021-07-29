@@ -20,11 +20,16 @@
                 disable-sort
               >
                 <template v-slot:item.fraction="{ item }">
-                  <v-progress-linear :value="item.fraction" height="25">
+                  <v-progress-linear
+                    v-if="showProgressBar"
+                    :value="item.fraction"
+                    height="25"
+                  >
                     <template v-slot:default="{ value }">
                       <strong>{{ Math.ceil(value) }}%</strong>
                     </template></v-progress-linear
                   >
+                  <strong v-else>{{ Math.ceil(item.fraction) }}%</strong>
                 </template>
                 <template v-slot:body.append>
                   <tr class="pa-0">
@@ -39,45 +44,93 @@
           <!-- control buttons -->
           <v-row>
             <v-col>
-              <v-btn color="success" @click="start"> start </v-btn>
-              <v-btn class="ma-2" color="error" @click="stop"> stop </v-btn>
-              <v-btn class="ma-2" color="primary" @click="reset"> reset </v-btn>
-              <v-btn icon color="primary">
-                <v-icon large>mdi-help-circle</v-icon>
-              </v-btn>
+              <v-row>
+                <v-col cols="6">
+                  <v-btn block color="success" @click="start"> start </v-btn>
+                </v-col>
+                <v-col cols="6">
+                  <v-btn block color="error" @click="stop"> stop </v-btn>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col>
+                  <v-btn block color="primary" @click="reset"> reset </v-btn>
+                </v-col>
+                <v-col>
+                  <v-menu offset-y>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        block
+                        color="primary"
+                        dark
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        Preset
+                      </v-btn>
+                    </template>
+                    <v-list>
+                      <v-list-item
+                        v-for="(item, index) in presets"
+                        :key="index"
+                        @click="loadPreset(index)"
+                      >
+                        <v-list-item-title>{{ item.title }}</v-list-item-title>
+                      </v-list-item>
+                    </v-list>
+                  </v-menu>
+                </v-col>
+              </v-row>
             </v-col>
           </v-row>
           <!-- sliders -->
-          <v-slider v-model="speed" label="snelheid" min="1" max="100" step="5"
-            ><template v-slot:append>
-              <v-text-field
-                v-model="speed"
-                class="mt-0 pt-0"
-                type="number"
-                style="width: 60px"
-              ></v-text-field> </template
-          ></v-slider>
-          <v-slider v-model="alpha" label="alpha" min="0" max="1" step="0.05"
-            ><template v-slot:append>
-              <v-text-field
-                v-model="alpha"
-                class="mt-0 pt-0"
-                type="number"
-                step="0.05"
-                style="width: 60px"
-              ></v-text-field> </template
-          ></v-slider>
           <v-row>
-            <v-col
-              ><small
-                >Klik op de pijlen om verbindingen te activeren of te
-                deactiveren.</small
-              >
+            <v-slider
+              v-model="speed"
+              label="snelheid"
+              min="1"
+              max="100"
+              step="5"
+              ><template v-slot:append>
+                <v-text-field
+                  v-model="speed"
+                  class="mt-0 pt-0"
+                  type="number"
+                  style="width: 60px"
+                ></v-text-field> </template
+            ></v-slider>
+          </v-row>
+          <v-row>
+            <v-slider v-model="alpha" label="alpha" min="0" max="1" step="0.05"
+              ><template v-slot:append>
+                <v-text-field
+                  v-model="alpha"
+                  class="mt-0 pt-0"
+                  type="number"
+                  step="0.05"
+                  style="width: 60px"
+                ></v-text-field> </template
+            ></v-slider>
+          </v-row>
+          <v-row>
+            <v-col>
+              <v-btn icon color="primary" @click.stop="infoDialog = true">
+                <v-icon large>mdi-help-circle</v-icon>
+              </v-btn>
             </v-col>
           </v-row>
         </v-col>
       </v-row>
     </v-container>
+
+    <!-- info dialog -->
+    <v-dialog v-model="infoDialog" max-width="290">
+      <v-card>
+        <v-card-title class="text-h5"> Info </v-card-title>
+
+        <v-card-text> Todooo </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -85,11 +138,13 @@
 import Graph from "./components/Graph.vue";
 import { Node, NodeUtils } from "./pagerank/Node";
 import { PageRankSimulator } from "./pagerank/PageRankSimulator";
+import { PRESETS } from "./presets";
 
 export default {
   components: { Graph },
   data() {
     return {
+      infoDialog: false,
       running: false,
       nodes: null,
       pageRankSim: null,
@@ -132,9 +187,30 @@ export default {
           fraction: 0,
         },
       ],
+      presets: PRESETS,
     };
   },
   methods: {
+    loadPreset(i) {
+      this.stop();
+      this.reset();
+
+      let n1 = this.nodes[0];
+      let n2 = this.nodes[1];
+      let n3 = this.nodes[2];
+      let n4 = this.nodes[3];
+      let n5 = this.nodes[4];
+      NodeUtils.clearConnections(n1);
+      NodeUtils.clearConnections(n2);
+      NodeUtils.clearConnections(n3);
+      NodeUtils.clearConnections(n4);
+      NodeUtils.clearConnections(n5);
+      this.nodes = PRESETS[i].create(n1, n2, n3, n4, n5);
+
+      this.$refs.graph.updateState();
+
+      this.reset();
+    },
     restStatistics() {
       for (const n of this.nodes) {
         n.hits = 0;
@@ -265,6 +341,12 @@ export default {
   computed: {
     totalHits() {
       return this.pageRankSim.totalHits;
+    },
+    showProgressBar() {
+      return (
+        this.$vuetify.breakpoint.name == "xl" ||
+        this.$vuetify.breakpoint.name == "lg"
+      );
     },
   },
   mounted() {

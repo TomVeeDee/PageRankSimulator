@@ -60,6 +60,7 @@ export default {
       // this.prevH = this.canvasContainer.getBoundingClientRect().height;
       // this.resize();
       window.onresize = () => {
+        // console.log(this.$vuetify.breakpoint.name);
         this.resize();
       };
     },
@@ -105,8 +106,9 @@ export default {
     removeHighlights() {
       this.drawer.removeHighlights();
     },
-    resetState() {
-      this.drawer.resetState();
+    updateState() {
+      //update the view with the data model
+      this.drawer.updateState();
     },
   },
 
