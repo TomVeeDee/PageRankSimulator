@@ -3,5 +3,5 @@ module.exports = {
     'vuetify'
   ],
   filenameHashing: false,
-  publicPath: '/onderwijs/juniorcollege/STEM-Life-Sciences/pagerank/'
+  publicPath: '/~u0041608/pagerank/'
 }
