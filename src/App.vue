@@ -66,7 +66,7 @@
                         v-bind="attrs"
                         v-on="on"
                       >
-                        Preset
+                        Examples
                       </v-btn>
                     </template>
                     <v-list>
@@ -146,6 +146,17 @@ export default {
   components: { Graph },
   meta: {
     title: "Login",
+  },
+  head: {
+    title: {
+      inner: "JuniorCollege PageRank",
+    },
+    link: [
+      {
+        rel: "icon",
+        href: require("./assets/favicon.png"),
+      },
+    ],
   },
   data() {
     return {
@@ -343,7 +354,6 @@ export default {
     },
   },
   created() {
-    document.title = "PageRank";
     this.init();
   },
   computed: {
