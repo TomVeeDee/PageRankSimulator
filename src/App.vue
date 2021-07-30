@@ -57,28 +57,14 @@
                   <v-btn block color="primary" @click="reset"> reset </v-btn>
                 </v-col>
                 <v-col>
-                  <v-menu offset-y>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn
-                        block
-                        color="primary"
-                        dark
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        Examples
-                      </v-btn>
-                    </template>
-                    <v-list>
-                      <v-list-item
-                        v-for="(item, index) in presets"
-                        :key="index"
-                        @click="loadPreset(index)"
-                      >
-                        <v-list-item-title>{{ item.title }}</v-list-item-title>
-                      </v-list-item>
-                    </v-list>
-                  </v-menu>
+                  <v-btn
+                    block
+                    outlined
+                    color="primary"
+                    @click.stop="exampleDialog = true"
+                  >
+                    Examples
+                  </v-btn>
                 </v-col>
               </v-row>
             </v-col>
@@ -124,11 +110,28 @@
     </v-container>
 
     <!-- info dialog -->
-    <v-dialog v-model="infoDialog" max-width="290">
+    <v-dialog v-model="exampleDialog">
       <v-card>
-        <v-card-title class="text-h5"> Info </v-card-title>
-
-        <v-card-text> Todooo </v-card-text>
+        <v-row dense>
+          <v-col
+            v-for="(e, index) in presets"
+            :key="index"
+            sm="12"
+            md="6"
+            xl="3"
+            lg="3"
+          >
+            <v-card
+              @click="
+                loadPreset(index);
+                exampleDialog = false;
+              "
+            >
+              <v-card-title>{{ e.title }}</v-card-title>
+              <v-img :src="e.img"></v-img>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-card>
     </v-dialog>
   </v-app>
@@ -160,7 +163,7 @@ export default {
   },
   data() {
     return {
-      infoDialog: false,
+      exampleDialog: false,
       running: false,
       nodes: null,
       pageRankSim: null,
@@ -211,18 +214,24 @@ export default {
       this.stop();
       this.reset();
 
-      let n1 = this.nodes[3];
-      let n2 = this.nodes[4];
-      let n3 = this.nodes[0];
-      let n4 = this.nodes[1];
-      let n5 = this.nodes[2];
-      NodeUtils.clearConnections(n1);
-      NodeUtils.clearConnections(n2);
-      NodeUtils.clearConnections(n3);
-      NodeUtils.clearConnections(n4);
-      NodeUtils.clearConnections(n5);
-      this.nodes = PRESETS[i].create(n1, n2, n3, n4, n5);
-
+      let nA = this.nodes[3]; // third is node A
+      let nB = this.nodes[4];
+      let nC = this.nodes[0];
+      let nD = this.nodes[1];
+      let nE = this.nodes[2];
+      NodeUtils.clearConnections(nA);
+      NodeUtils.clearConnections(nB);
+      NodeUtils.clearConnections(nC);
+      NodeUtils.clearConnections(nD);
+      NodeUtils.clearConnections(nE);
+      //TODO make this better
+      let newNodes = PRESETS[i].create(nA, nB, nC, nD, nE);
+      // reorder them
+      this.nodes[3] = newNodes[0];
+      this.nodes[4] = newNodes[1];
+      this.nodes[0] = newNodes[2];
+      this.nodes[1] = newNodes[3];
+      this.nodes[2] = newNodes[4];
       this.$refs.graph.updateState();
 
       this.reset();
@@ -234,7 +243,7 @@ export default {
       this.pageRankSim.totalHits = 0;
     },
     init(reset = false) {
-      const NODE_NAMES = ["A", "B", "C", "D", "E"];
+      const NODE_NAMES = ["C", "D", "C", "A", "B"];
       let n1;
       let n2;
       let n3;
@@ -289,7 +298,7 @@ export default {
       NodeUtils.connect(n5, n3);
       NodeUtils.connect(n5, n4);
 
-      this.nodes = [n3, n4, n5, n1, n2];
+      this.nodes = [n1, n2, n3, n4, n5];
       this.data = [
         {
           siteName: "A",
