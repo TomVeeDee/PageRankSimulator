@@ -59,6 +59,7 @@
                 <v-col>
                   <v-btn
                     block
+                    outlined
                     color="primary"
                     @click.stop="exampleDialog = true"
                   >
