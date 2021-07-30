@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify'
-// import 'material-design-icons-iconfont/dist/material-design-icons.css'
+import VueHead from 'vue-head'
+ 
+Vue.use(VueHead)
 
 Vue.config.productionTip = false
 
