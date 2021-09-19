@@ -63,7 +63,7 @@
                     color="primary"
                     @click.stop="exampleDialog = true"
                   >
-                    Examples
+                    preset
                   </v-btn>
                 </v-col>
               </v-row>
@@ -109,7 +109,7 @@
       </v-row>
     </v-container>
 
-    <!-- info dialog -->
+    <!-- example dialog -->
     <v-dialog v-model="exampleDialog">
       <v-card>
         <v-row dense>
@@ -132,6 +132,42 @@
             </v-card>
           </v-col>
         </v-row>
+      </v-card>
+    </v-dialog>
+
+    <!-- info dialog -->
+    <v-dialog v-model="infoDialog">
+      <v-card>
+        <v-card-title> Werking van deze applet </v-card-title>
+        <v-card-text>
+          <div class="text-subtitle-1 text--primary">het netwerk</div>
+          De figuur stelt een miniweb van 5 websites voor. Klik op de pijlen om
+          verbindingen te (de)activeren.
+          <div class="text--primary text-subtitle-1">
+            het gebruiken van presets
+          </div>
+          Via de knop <v-btn small outlined color="primary"> preset </v-btn> kan
+          je voorgedefinieerde webstructuren gebruiken.
+          <div class="text-subtitle-1 text--primary">de applet starten</div>
+          Door op de knop
+          <v-btn small color="success"> start </v-btn> te klikken begint de
+          simulatie van een willekeurige surfer door dit miniweb. Het aantal
+          absolute en relatieve hits per site wordt bijgehouden en kan afgelezen
+          worden in de tabel.
+          <div class="text-subtitle-1 text--primary">de twee sliders</div>
+          Parameter alpha geeft de verhouding van de tijd dat de toevallige
+          surfer de hyperlinkstructuur van het web volgt tegenover de tijd
+          waarin hij zichzelf teleporteert door een willekeurig adres in te
+          tikken. Deze parameter kan je net zoals de snelheid zelf instellen.
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn color="blue darken-1" text @click="infoDialog = false">
+            Close
+          </v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
   </v-app>
@@ -163,6 +199,7 @@ export default {
   },
   data() {
     return {
+      infoDialog: false,
       exampleDialog: false,
       running: false,
       nodes: null,
