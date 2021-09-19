@@ -165,7 +165,7 @@
           <v-spacer></v-spacer>
 
           <v-btn color="blue darken-1" text @click="infoDialog = false">
-            Close
+            Sluiten
           </v-btn>
         </v-card-actions>
       </v-card>
