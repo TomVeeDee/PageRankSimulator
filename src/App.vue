@@ -280,7 +280,7 @@ export default {
       this.pageRankSim.totalHits = 0;
     },
     init(reset = false) {
-      const NODE_NAMES = ["C", "D", "C", "A", "B"];
+      const NODE_NAMES = ["C", "D", "E", "A", "B"];
       let n1;
       let n2;
       let n3;
